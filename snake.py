@@ -5,25 +5,23 @@ import copy
 
 board = [
     [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1],
+    [2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2],
     [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1],
+    [2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2],
     [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1],
+    [2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2],
     [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1],
+    [2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2],
     [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1],
+    [2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2],
     [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1],
+    [2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2],
     [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1],
-    [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1],
-    [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1],
-    [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1],
-    [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1],
-    [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1],
-    [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1],
-    [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1],
-    [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1],
-    [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1],
-    [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1],
+    [2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2],
+    [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1]
 ]
 
-WIDTH = 900
+WIDTH = 950
 HEIGHT = 950
 score_padding = HEIGHT - WIDTH
 
@@ -31,22 +29,23 @@ screen = pygame.display.set_mode([WIDTH, HEIGHT])
 timer = pygame.time.Clock()
 fps = 60
 level = copy.deepcopy(board)
-pygame.draw.rect(screen, 'white', pygame.Rect(30, 30, 60, 60))
 
 def drawboard():
-    squareHeight = ((HEIGHT - score_padding) // 32)
-    squareWidth = WIDTH // 30
-    # for column in range (len(board)):
-    #     for row in range(column[row]):
-    #         if column[row] == 1:
-    #
-
+    pygame.draw.rect(screen, (72, 118, 47), pygame.Rect(0, 0, 950, 100)) # top bar with score and stuff
+    
+    # pygame.draw.rect(screen, (165, 218, 87), pygame.Rect(50, 150, 50, 50))
+    for column in range (len(board)):
+        for row in range(len(board[column])):
+            if board[column][row] == 1:
+                pygame.draw.rect(screen, (165, 218, 87), pygame.Rect(50 + (50 * row), 150 + (50 * column), 50, 50))    
+            elif board[column][row] == 2:
+                pygame.draw.rect(screen, (150, 202, 76), pygame.Rect(50 + (50 * row), 150 + (50 * column), 50, 50))
 run = True
 while run:
     timer.tick(fps)
-    screen.fill('green')
-    pygame.draw.rect(screen, 'white', pygame.Rect(30, 30, 60, 60))
-
+    screen.fill((84, 140, 56))
+    # pygame.draw.rect(screen, 'white', pygame.Rect(30, 30, 30, 30))
+    drawboard()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
