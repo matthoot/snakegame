@@ -68,27 +68,33 @@ def move_snake(snakeHead_x, snakeHead_y):
 
 directions = { "left": 0, "right": 1, "up": 2, "down": 3 }
 def check_position(center_x, center_y):
-    valid_turns = [True, True, True, True]    
+    valid_turns = [False, False, False, False]    
     unitHeight = 16
     unitWidth = 18
     centerAdjust = 30
     
+    #if direction == directions["left"] or direction == directions["right"]:
+    
+    if center_x % 25 == 0 and center_x % 10 != 0:
+        valid_turns[directions["up"]] = True
+        valid_turns[directions["down"]] = True
+    if center_y % 25 == 0 and center_y % 10 != 0:
+        valid_turns[directions["left"]] = True
+        valid_turns[directions["right"]] = True
+        
+    #if we reach the a wall
     if (center_x - centerAdjust) < 50:
         valid_turns[directions["left"]] = False
-    else: 
-        valid_turns[directions["left"]] = True
+        valid_turns[directions["right"]] = True
     if (center_x + centerAdjust) > 900:
         valid_turns[directions["right"]] = False
-    else: 
-        valid_turns[directions["right"]] = True
+        valid_turns[directions["left"]] = True
     if (center_y + centerAdjust) < 210:
         valid_turns[directions["up"]] = False
-    else:
-        valid_turns[directions["up"]] = True
+        valid_turns[directions["down"]] = True
     if (center_y - centerAdjust) > 840:
         valid_turns[directions["down"]] = False
-    else:
-        valid_turns[directions["down"]] = True
+        valid_turns[directions["up"]] = True
     return valid_turns
 
 run = True
