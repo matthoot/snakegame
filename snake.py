@@ -33,10 +33,8 @@ snakeHead_y = 505
 directions = { "left": 0, "right": 1, "up": 2, "down": 3, "none": 4}
 direction = directions["none"]
 direction_command = directions["none"]
-next_direction = directions["none"]
 snakeHead_image = pygame.image.load('assets/snake.png')
 snake_speed = 5
-
 screen = pygame.display.set_mode([WIDTH, HEIGHT])
 timer = pygame.time.Clock()
 fps = 60
@@ -63,15 +61,32 @@ def move_snake(snakeHead_x, snakeHead_y):
         snakeHead_y -= snake_speed
     elif direction == directions["down"] and valid_turns[directions["down"]]:
         snakeHead_y += snake_speed
-    
+    print("direction = ", direction)
+    print(valid_turns)   
     return snakeHead_x, snakeHead_y    
 
-def check_position(center_x, center_y, next_direction):
-    valid_turns = [False, False, False, False]
+def check_position(center_x, center_y):
+    valid_turns = [False, False, False, False]  
     centerAdjust = 30
     currentSquare_x = center_x - ((center_x // 50) * 50)
     currentSquare_y = center_y - ((center_y // 50) * 50)
-    print(currentSquare_x, currentSquare_y)
+    if direction == directions["none"] and direction_command == directions["none"]:
+        return [True, True, True, True]
+    
+    if 20 <= currentSquare_x <= 30:
+        valid_turns[directions["up"]] = True
+        valid_turns[directions["down"]] = True
+    else:
+        valid_turns[directions["up"]] = False
+        valid_turns[directions["down"]] = False
+            
+    if 20 <= currentSquare_y <= 30:
+        valid_turns[directions["right"]] = True
+        valid_turns[directions["left"]] = True
+    else:
+        valid_turns[directions["right"]] = False
+        valid_turns[directions["left"]] = False
+    
     if (center_x - centerAdjust) < 50:
         valid_turns[directions["left"]] = False
     if (center_x + centerAdjust) > 900:
@@ -80,32 +95,7 @@ def check_position(center_x, center_y, next_direction):
         valid_turns[directions["up"]] = False
     if (center_y - centerAdjust) > 840:
         valid_turns[directions["down"]] = False
-
-    if direction == directions["right"] or direction == directions["left"]:
-        if 16 <= currentSquare_x <= 34:
-            if next_direction != directions["none"]:
-                next_direction = directions["none"]
-            else:
-                valid_turns[directions["up"]] = True
-                valid_turns[directions["down"]] = True
-        else:
-            valid_turns[directions["up"]] = False
-            valid_turns[directions["down"]] = False
-  
-    if direction == directions["up"] or direction == directions["down"]:
-        if 16 <= currentSquare_y <= 34:
-            if next_direction != directions["none"]:
-                valid_turns[next_direction] = True
-                next_direction = directions["none"]                
-            else:
-                valid_turns[directions["right"]] = True
-                valid_turns[directions["left"]] = True
-        else:
-            valid_turns[directions["right"]] = False
-            valid_turns[directions["left"]] = False
-    if direction == directions["none"]:
-        valid_turns = [True, True, True, True]
-    return valid_turns
+    return valid_turns    
 
 run = True
 while run:
@@ -114,10 +104,10 @@ while run:
     drawboard()
     center_x = snakeHead_x + 20
     center_y = snakeHead_y + 20
+    next_direction = directions["none"]
     screen.blit(snakeHead_image, (snakeHead_x, snakeHead_y))
     pygame.draw.circle(screen, 'pink', (center_x, center_y), 2)
-    valid_turns = check_position(center_x, center_y, next_direction)
-    print(direction, next_direction)
+    valid_turns = check_position(center_x, center_y)
     snakeHead_x, snakeHead_y = move_snake(snakeHead_x, snakeHead_y)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -131,38 +121,18 @@ while run:
                 direction_command = directions["up"]
             if event.key == pygame.K_DOWN:
                 direction_command = directions["down"]
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_RIGHT and direction_command == directions["right"]:
-                direction_command = direction
-            if event.key == pygame.K_LEFT and direction_command == directions["left"]:
-                direction_command = direction
-            if event.key == pygame.K_UP and direction_command == directions["up"]:
-                direction_command = direction
-            if event.key == pygame.K_DOWN and direction_command == directions["down"]:
-                direction_command = direction
-    
-    if direction_command == directions["right"]:
-        if valid_turns[directions["right"]]:
-            direction = directions["right"]
-            next_direction = directions["none"]
-        else:
-            next_direction = directions["right"]
-    if direction_command == directions["left"]:
-        if valid_turns[directions["left"]]:
-            direction = directions["left"]
-            next_direction = directions["none"]
-        else:
-            next_direction = directions["left"]
-    if direction_command == directions["up"]:
-        if valid_turns[directions["up"]]:
-            direction = directions["up"]
-            next_direction = directions["none"]
-        else:
-            next_direction = directions["left"]
-    if direction_command == directions["down"]:
-        if valid_turns[directions["down"]]:
-            direction = directions["down"]
-            next_direction = directions["none"]
-        else: next_direction = directions["down"]
-              
+    if direction_command == directions["right"] and valid_turns[directions["right"]]:
+        print("here 0")
+        direction = directions["right"]
+    if direction_command == directions["left"] and valid_turns[directions["left"]]:
+        print("here 1")
+        direction = directions["left"]
+    if direction_command == directions["up"] and valid_turns[directions["up"]]:
+        print("here 2")
+        direction = directions["up"]
+    if direction_command == directions["down"] and valid_turns[directions["down"]]:
+        print("here 3")
+        direction = directions["down"]
     pygame.display.flip()
+    
+pygame.quit()
