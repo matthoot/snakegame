@@ -61,8 +61,6 @@ def move_snake(snakeHead_x, snakeHead_y):
         snakeHead_y -= snake_speed
     elif direction == directions["down"] and valid_turns[directions["down"]]:
         snakeHead_y += snake_speed
-    print("direction = ", direction)
-    print(valid_turns)   
     return snakeHead_x, snakeHead_y    
 
 def check_position(center_x, center_y):
@@ -121,18 +119,20 @@ while run:
                 direction_command = directions["up"]
             if event.key == pygame.K_DOWN:
                 direction_command = directions["down"]
+    
+    
     if direction_command == directions["right"] and valid_turns[directions["right"]]:
-        print("here 0")
         direction = directions["right"]
     if direction_command == directions["left"] and valid_turns[directions["left"]]:
-        print("here 1")
         direction = directions["left"]
     if direction_command == directions["up"] and valid_turns[directions["up"]]:
-        print("here 2")
         direction = directions["up"]
     if direction_command == directions["down"] and valid_turns[directions["down"]]:
-        print("here 3")
         direction = directions["down"]
+        
+    print("direction = ", direction)  
+    print("direction_command = ", direction_command)    
+        
     pygame.display.flip()
     
 pygame.quit()
