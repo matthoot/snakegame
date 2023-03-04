@@ -1,5 +1,6 @@
 import pygame
 import copy
+import random
 
 # 1 = light green, 2 = dark green, 3 = wall, 4 = light green with apple, 5 = dark green with apple
 
@@ -33,7 +34,9 @@ snakeHead_y = 505
 directions = { "left": 0, "right": 1, "up": 2, "down": 3, "none": 4}
 direction = directions["none"]
 direction_command = directions["none"]
+last_direction = directions["none"]
 snakeHead_image = pygame.image.load('assets/snake.png')
+orange_image = pygame.image.load('assets/orange.png')
 snake_speed = 5
 screen = pygame.display.set_mode([WIDTH, HEIGHT])
 timer = pygame.time.Clock()
@@ -52,7 +55,9 @@ def drawboard():
             elif board[column][row] == 3:
                 pygame.draw.rect(screen, (84, 140, 56), pygame.Rect(50 * row, 100 + (50 * column), 50, 50))
 
-def move_snake(snakeHead_x, snakeHead_y):
+def move_snake(direction, snakeHead_x, snakeHead_y):
+    if not valid_turns[direction]:
+        direction = last_direction
     if direction == directions["left"] and valid_turns[directions["left"]]:
         snakeHead_x -= snake_speed
     elif direction == directions["right"] and valid_turns[directions["right"]]:
@@ -61,15 +66,15 @@ def move_snake(snakeHead_x, snakeHead_y):
         snakeHead_y -= snake_speed
     elif direction == directions["down"] and valid_turns[directions["down"]]:
         snakeHead_y += snake_speed
-    return snakeHead_x, snakeHead_y    
+    return direction, snakeHead_x, snakeHead_y    
 
 def check_position(center_x, center_y):
-    valid_turns = [False, False, False, False]  
+    valid_turns = [False, False, False, False, False]  
     centerAdjust = 30
     currentSquare_x = center_x - ((center_x // 50) * 50)
     currentSquare_y = center_y - ((center_y // 50) * 50)
     if direction == directions["none"] and direction_command == directions["none"]:
-        return [True, True, True, True]
+        return [True, True, True, True, False]
     
     if 20 <= currentSquare_x <= 30:
         valid_turns[directions["up"]] = True
@@ -93,7 +98,16 @@ def check_position(center_x, center_y):
         valid_turns[directions["up"]] = False
     if (center_y - centerAdjust) > 840:
         valid_turns[directions["down"]] = False
+        
     return valid_turns    
+
+def draw_orange():
+    rows = 15
+    cols = 17
+    row_index = random.randint(0, rows-1)
+    col_index = random.randint(0, cols-1)
+    screen.blit(orange_image, (58 + (50 * col_index), 158 + (50 * row_index)))
+    
 
 run = True
 while run:
@@ -102,11 +116,10 @@ while run:
     drawboard()
     center_x = snakeHead_x + 20
     center_y = snakeHead_y + 20
-    next_direction = directions["none"]
     screen.blit(snakeHead_image, (snakeHead_x, snakeHead_y))
-    pygame.draw.circle(screen, 'pink', (center_x, center_y), 2)
+    draw_orange()
     valid_turns = check_position(center_x, center_y)
-    snakeHead_x, snakeHead_y = move_snake(snakeHead_x, snakeHead_y)
+    direction, snakeHead_x, snakeHead_y = move_snake(direction, snakeHead_x, snakeHead_y)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
@@ -120,7 +133,7 @@ while run:
             if event.key == pygame.K_DOWN:
                 direction_command = directions["down"]
     
-    
+    last_direction = direction
     if direction_command == directions["right"] and valid_turns[directions["right"]]:
         direction = directions["right"]
     if direction_command == directions["left"] and valid_turns[directions["left"]]:
@@ -128,10 +141,7 @@ while run:
     if direction_command == directions["up"] and valid_turns[directions["up"]]:
         direction = directions["up"]
     if direction_command == directions["down"] and valid_turns[directions["down"]]:
-        direction = directions["down"]
-        
-    print("direction = ", direction)  
-    print("direction_command = ", direction_command)    
+        direction = directions["down"]  
         
     pygame.display.flip()
     
