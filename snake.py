@@ -2,8 +2,8 @@ import pygame
 import copy
 import random
 
+pygame.init()
 # 1 = light green, 2 = dark green, 3 = wall, 4 = light green with apple, 5 = dark green with apple
-
 #18 x 16 board, 850x750
 
 board = [
@@ -40,8 +40,25 @@ orange_image = pygame.image.load('assets/orange.png')
 snake_speed = 5
 screen = pygame.display.set_mode([WIDTH, HEIGHT])
 timer = pygame.time.Clock()
+font = pygame.font.Font('freesansbold.ttf',20)
 fps = 60
 level = copy.deepcopy(board)
+rows = 15
+cols = 17
+row_index = random.randint(0, rows-1)
+col_index = random.randint(0, cols-1)
+orange_x = 58 + (50 * col_index)
+orange_y = 158 + (50 * row_index)
+center_snake_x = snakeHead_x + 20
+center_snake_y = snakeHead_y + 20
+center_orange_x = orange_x + 16
+center_orange_y = orange_y + 16
+screen.blit(snakeHead_image, (snakeHead_x, snakeHead_y))
+snake_collision_box = pygame.draw.circle(screen, 'red', (center_snake_x, center_snake_y), 20, 2)
+orange_collision_box = pygame.draw.circle(screen, 'red', (center_orange_x, center_orange_y), 16, 2)
+score = 0
+
+orange_collision = False
 
 def drawboard():
     pygame.draw.rect(screen, (72, 118, 47), pygame.Rect(0, 0, 950, 100)) # top bar with score and stuff
@@ -99,26 +116,33 @@ def check_position(center_x, center_y):
     if (center_y - centerAdjust) > 840:
         valid_turns[directions["down"]] = False
         
-    return valid_turns    
+    return valid_turns   
 
-def draw_orange():
-    rows = 15
-    cols = 17
-    row_index = random.randint(0, rows-1)
-    col_index = random.randint(0, cols-1)
-    screen.blit(orange_image, (58 + (50 * col_index), 158 + (50 * row_index)))
-    
+def draw_misc():
+    score_text = font.render(f'Score: {score}', True, 'white')
+    screen.blit(score_text, (10, 10))
 
 run = True
 while run:
     timer.tick(fps)
     screen.fill((0, 0, 0))
     drawboard()
-    center_x = snakeHead_x + 20
-    center_y = snakeHead_y + 20
+    draw_misc()
+    if snake_collision_box.colliderect(orange_collision_box):
+        row_index = random.randint(0, rows-1)
+        col_index = random.randint(0, cols-1)
+        orange_x = 58 + (50 * col_index)
+        orange_y = 158 + (50 * row_index)
+        score += 1
+    center_snake_x = snakeHead_x + 20
+    center_snake_y = snakeHead_y + 20
+    center_orange_x = orange_x + 16
+    center_orange_y = orange_y + 16
+    snake_collision_box = pygame.draw.circle(screen, 'black', (center_snake_x, center_snake_y), 20, 2)
+    orange_collision_box = pygame.draw.circle(screen, 'black', (center_orange_x, center_orange_y), 15, 2)
+    screen.blit(orange_image, (orange_x, orange_y))
     screen.blit(snakeHead_image, (snakeHead_x, snakeHead_y))
-    draw_orange()
-    valid_turns = check_position(center_x, center_y)
+    valid_turns = check_position(center_snake_x, center_snake_y)
     direction, snakeHead_x, snakeHead_y = move_snake(direction, snakeHead_x, snakeHead_y)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
