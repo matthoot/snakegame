@@ -60,6 +60,49 @@ score = 0
 
 orange_collision = False
 
+class Segment:
+    def __init__(self, x, y):
+        self.x_position = x
+        self.y_position = y
+        self.next_segment = None
+        
+    def move(self, dx, dy):
+        self.x_position += dx
+        self.y_position += dy
+            
+class Snake:
+    def __init__(self, x, y):
+        self.head = Segment(x, y)
+        self.length = 1
+        self.tail = self.head
+        self.direction = None
+    
+    def moveSegments(self, dx, dy):
+        current_segment = self.tail
+        while current_segment != self.head:
+            current_segment.x = current_segment.next_segment.x
+            current_segment.y = current_segment.next_segment.y
+            current_segment = current_segment.next_segment
+        self.head.move(dx, dy)
+    
+    def draw(self, screen):
+        segment = self.head
+        while segment is not None:
+            screen.blit(segment.surface, segment.rect)
+            segment = segment.next_segment
+            
+    def set_direction(self, direction):
+        self.direction = direction
+        
+    def move(self):
+        if self.direction is None:
+            return
+
+class Orange:
+    def __init__(self, x, y):    
+        self.x = x
+        self.y = y
+
 def drawboard():
     pygame.draw.rect(screen, (72, 118, 47), pygame.Rect(0, 0, 950, 100)) # top bar with score and stuff
     
