@@ -26,6 +26,20 @@ board = [
     [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
 ]
 
+class Orange:
+    def __init__(self):    
+        self.image = pygame.image.load('assets/orange.png')
+        self.rect = self.image.get_rect()
+    
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+    
+    def randomize(self):
+        self.row_index = random.randint(0, rows-1)
+        self.col_index = random.randint(0, cols-1)
+        self.rect.x = 58 + (50 * self.col_index)
+        self.rect.y = 158 + (50 * self.row_index)
+
 WIDTH = 950
 HEIGHT = 950
 score_padding = HEIGHT - WIDTH
@@ -45,31 +59,27 @@ fps = 60
 level = copy.deepcopy(board)
 rows = 15
 cols = 17
-row_index = random.randint(0, rows-1)
-col_index = random.randint(0, cols-1)
-orange_x = 58 + (50 * col_index)
-orange_y = 158 + (50 * row_index)
 center_snake_x = snakeHead_x + 20
 center_snake_y = snakeHead_y + 20
-center_orange_x = orange_x + 16
-center_orange_y = orange_y + 16
 screen.blit(snakeHead_image, (snakeHead_x, snakeHead_y))
 snake_collision_box = pygame.draw.circle(screen, 'red', (center_snake_x, center_snake_y), 20, 2)
-orange_collision_box = pygame.draw.circle(screen, 'red', (center_orange_x, center_orange_y), 16, 2)
+orange = Orange()
 score = 0
 
 orange_collision = False
 
 class Segment:
     def __init__(self, x, y):
-        self.x_position = x
-        self.y_position = y
+        self.x = x
+        self.y = y
+        self.center_x = x + 20
+        self.center_y = y + 20
         self.next_segment = None
         
     def move(self, dx, dy):
-        self.x_position += dx
-        self.y_position += dy
-            
+        self.x += dx
+        self.x += dy
+        
 class Snake:
     def __init__(self, x, y):
         self.head = Segment(x, y)
@@ -97,11 +107,6 @@ class Snake:
     def move(self):
         if self.direction is None:
             return
-
-class Orange:
-    def __init__(self, x, y):    
-        self.x = x
-        self.y = y
 
 def drawboard():
     pygame.draw.rect(screen, (72, 118, 47), pygame.Rect(0, 0, 950, 100)) # top bar with score and stuff
@@ -165,25 +170,20 @@ def draw_misc():
     score_text = font.render(f'Score: {score}', True, 'white')
     screen.blit(score_text, (10, 10))
 
+orange.randomize()
 run = True
 while run:
     timer.tick(fps)
     screen.fill((0, 0, 0))
     drawboard()
     draw_misc()
-    if snake_collision_box.colliderect(orange_collision_box):
-        row_index = random.randint(0, rows-1)
-        col_index = random.randint(0, cols-1)
-        orange_x = 58 + (50 * col_index)
-        orange_y = 158 + (50 * row_index)
+    orange.draw(screen)
+    if snake_collision_box.colliderect(orange.rect):
+        orange.randomize()
         score += 1
     center_snake_x = snakeHead_x + 20
     center_snake_y = snakeHead_y + 20
-    center_orange_x = orange_x + 16
-    center_orange_y = orange_y + 16
     snake_collision_box = pygame.draw.circle(screen, 'black', (center_snake_x, center_snake_y), 20, 2)
-    orange_collision_box = pygame.draw.circle(screen, 'black', (center_orange_x, center_orange_y), 15, 2)
-    screen.blit(orange_image, (orange_x, orange_y))
     screen.blit(snakeHead_image, (snakeHead_x, snakeHead_y))
     valid_turns = check_position(center_snake_x, center_snake_y)
     direction, snakeHead_x, snakeHead_y = move_snake(direction, snakeHead_x, snakeHead_y)
