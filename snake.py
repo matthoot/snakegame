@@ -7,6 +7,9 @@ pygame.init()
 # 1 = light green, 2 = dark green, 3 = wall, 4 = light green with apple, 5 = dark green with apple
 #18 x 16 board, 850x750
 
+snakeHead_image = pygame.image.load('assets/snake.png')
+snakeTail_image = pygame.image.load('assets/tail.png')
+orange_image = pygame.image.load('assets/orange.png')
 
 board = [
     [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
@@ -30,7 +33,7 @@ board = [
 
 class Orange:
     def __init__(self):    
-        self.image = pygame.image.load('assets/orange.png')
+        self.image = orange_image
         self.rect = self.image.get_rect()
     
     def draw(self, screen):
@@ -43,9 +46,9 @@ class Orange:
         self.rect.y = 158 + (50 * self.row_index)
 
 class Segment:
-    def __init__(self, x, y):
+    def __init__(self, x, y, image):
         self.next_segment = None
-        self.image = pygame.image.load('assets/snake2.png')
+        self.image = image
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -70,7 +73,7 @@ class Segment:
             
 class Snake:
     def __init__(self, x, y):
-        self.head = Segment(x, y)
+        self.head = Segment(x, y, snakeHead_image)
         self.length = 1
         self.tail = self.head
         self.direction = "none"
@@ -82,16 +85,19 @@ class Snake:
         self.speed = 5
         
     def move(self):
-        if self.direction == "left" and self.canGoLeft:
-            self.head.moveLeft(self.speed)
-        elif self.direction == "right" and self.canGoRight:
-            self.head.moveRight(self.speed)
-        elif self.direction == "up" and self.canGoUp:
-            self.head.moveUp(self.speed)
-        elif self.direction == "down" and self.canGoDown:
-            self.head.moveDown(self.speed)
-        else:
-            self.direction = self.last_direction
+        current_segment = self.head
+        while current_segment != None:
+            if self.direction == "left" and self.canGoLeft:
+                current_segment.moveLeft(self.speed)
+            elif self.direction == "right" and self.canGoRight:
+                current_segment.moveRight(self.speed)
+            elif self.direction == "up" and self.canGoUp:
+                current_segment.moveUp(self.speed)
+            elif self.direction == "down" and self.canGoDown:
+                current_segment.moveDown(self.speed)
+            else:
+                self.direction = self.last_direction
+            current_segment = current_segment.next_segment            
             
     def check_direction(self):
         centerAdjust = 30
@@ -123,6 +129,20 @@ class Snake:
         if (self.head.center_y - centerAdjust) > 840:
             self.canGoDown = False
     
+    def addSegment(self):
+        offset = 50
+        last_segment = self.tail
+        if self.direction == "left":
+            new_segment = Segment(last_segment.rect.x + offset, last_segment.rect.y, snakeTail_image)
+        elif self.direction == "right":
+            new_segment = Segment(last_segment.rect.x - offset, last_segment.rect.y, snakeTail_image)
+        elif self.direction == "up":
+            new_segment = Segment(last_segment.rect.x, last_segment.rect.y + offset, snakeTail_image)
+        elif self.direction == "down":
+            new_segment = Segment(last_segment.rect.x, last_segment.rect.y - offset, snakeTail_image)
+        last_segment.next_segment = new_segment
+        self.tail = new_segment
+
     # def moveSegments(self, dx, dy):
     #     current_segment = self.tail
     #     while current_segment != self.head:
@@ -179,6 +199,7 @@ while run:
     snake.draw(screen)
     if snake.head.rect.colliderect(orange.rect):
         orange.randomize()
+        snake.addSegment()
         score += 1
     snake.check_direction()
     snake.move()
