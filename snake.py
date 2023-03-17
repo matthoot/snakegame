@@ -48,12 +48,16 @@ class Orange:
 class Segment:
     def __init__(self, x, y, image):
         self.next_segment = None
+        self.last_segment = None
         self.image = image
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
         self.center_x = x + 20
         self.center_y = y + 20
+        self.direction = "none"
+        self.index = 0
+        self.move_delay = 0
         
     def moveLeft(self, speed):
         self.rect.x -= speed
@@ -83,21 +87,22 @@ class Snake:
         self.canGoUp = False
         self.canGoDown = False
         self.speed = 5
+        self.offset = 50
+        self.totalSegments = 0
         
     def move(self):
-        current_segment = self.head
-        while current_segment != None:
-            if self.direction == "left" and self.canGoLeft:
-                current_segment.moveLeft(self.speed)
-            elif self.direction == "right" and self.canGoRight:
-                current_segment.moveRight(self.speed)
-            elif self.direction == "up" and self.canGoUp:
-                current_segment.moveUp(self.speed)
-            elif self.direction == "down" and self.canGoDown:
-                current_segment.moveDown(self.speed)
-            else:
-                self.direction = self.last_direction
-            current_segment = current_segment.next_segment            
+
+        if self.direction == "left" and self.canGoLeft:
+            self.head.moveLeft(self.speed)
+        elif self.direction == "right" and self.canGoRight:
+            self.head.moveRight(self.speed)
+        elif self.direction == "up" and self.canGoUp:
+            self.head.moveUp(self.speed)
+        elif self.direction == "down" and self.canGoDown:
+            self.head.moveDown(self.speed)
+        else:
+            self.direction = self.last_direction
+            
             
     def check_direction(self):
         centerAdjust = 30
@@ -130,27 +135,55 @@ class Snake:
             self.canGoDown = False
     
     def addSegment(self):
-        offset = 50
         last_segment = self.tail
         if self.direction == "left":
-            new_segment = Segment(last_segment.rect.x + offset, last_segment.rect.y, snakeTail_image)
+            new_segment = Segment(last_segment.rect.x + self.offset, last_segment.rect.y, snakeTail_image)
         elif self.direction == "right":
-            new_segment = Segment(last_segment.rect.x - offset, last_segment.rect.y, snakeTail_image)
+            new_segment = Segment(last_segment.rect.x - self.offset, last_segment.rect.y, snakeTail_image)
         elif self.direction == "up":
-            new_segment = Segment(last_segment.rect.x, last_segment.rect.y + offset, snakeTail_image)
+            new_segment = Segment(last_segment.rect.x, last_segment.rect.y + self.offset, snakeTail_image)
         elif self.direction == "down":
-            new_segment = Segment(last_segment.rect.x, last_segment.rect.y - offset, snakeTail_image)
+            new_segment = Segment(last_segment.rect.x, last_segment.rect.y - self.offset, snakeTail_image)
         last_segment.next_segment = new_segment
+        new_segment.last_segment = last_segment
         self.tail = new_segment
+        self.totalSegments += 1
+        new_segment.index = self.totalSegments
+        new_segment.move_delay = new_segment.index * 10
 
-    # def moveSegments(self, dx, dy):
-    #     current_segment = self.tail
-    #     while current_segment != self.head:
-    #         current_segment.x = current_segment.next_segment.x
-    #         current_segment.y = current_segment.next_segment.y
-    #         current_segment = current_segment.next_segment
-    #     self.move(dx, dy)
-    
+    def moveSegments(self):
+        current = self.head.next_segment
+        prev = self.head
+        if prev == self.head:
+            prev.direction = self.direction
+        while current: 
+            if current.move_delay == 0:
+                if prev.direction == 'left':
+                    current.direction = 'left'
+                elif prev.direction == 'right':
+                    current.direction = 'right'
+                elif prev.direction == 'up':
+                    current.direction = 'up'
+                elif prev.direction == 'down':
+                    current.direction = "down"
+                print(prev.direction)
+            else:
+                current.move_delay -= 1        
+            if current.direction == "left":
+                current.moveLeft(self.speed)
+            elif current.direction == "right":
+                current.moveRight(self.speed)
+            elif current.direction == "up":
+                current.moveUp(self.speed)
+            elif current.direction == "down":
+                current.moveDown(self.speed)
+            prev = current
+            current = current.next_segment
+        #for each segment in the list of segments, each segment should wait 10 * indexOfSegments before moving
+        
+            
+
+                    
     def draw(self, screen):
         segment = self.head
         while segment is not None:
@@ -170,6 +203,7 @@ orange = Orange()
 snake = Snake(255, 505)
 score = 0
 direction_command = "none"
+move_delay = 0
 
 
 def drawboard():
@@ -203,6 +237,7 @@ while run:
         score += 1
     snake.check_direction()
     snake.move()
+    snake.moveSegments()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
