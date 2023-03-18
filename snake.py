@@ -150,25 +150,48 @@ class Snake:
         self.totalSegments += 1
         new_segment.index = self.totalSegments
         new_segment.move_delay = new_segment.index * 10
+        new_segment.direction = self.direction
 
+    def updateSegmentDirection(self):
+        current = self.head.next_segment
+        prev = self.head
+        if prev == self.head:
+            prev.direction = self.direction    
+        while current:
+            if current.direction == "right" and prev.direction == "up":
+                if current.center_x == prev.center_x:
+                    current.direction = "up"
+            elif current.direction == "right" and prev.direction == "down":
+                if current.center_x == prev.center_x:
+                    current.direction = "down"
+            elif current.direction == "left" and prev.direction == "up":
+                if current.center_x == prev.center_x:    
+                    current.direction = "up"
+            elif current.direction == "left" and prev.direction == "down":
+                if current.center_x == prev.center_x:    
+                    current.direction = "down"
+            elif current.direction == "up" and prev.direction == "left":
+                if current.center_y == prev.center_y:
+                    current.direction = "left"
+            elif current.direction == "up" and prev.direction == "right":
+                if current.center_y == prev.center_y:
+                        current.direction = "right"    
+            elif current.direction == "down" and prev.direction == "left":
+                if current.center_y == prev.center_y:
+                            current.direction = "left"
+            elif current.direction == "down" and prev.direction == "right":
+                if current.center_y == prev.center_y:
+                            current.direction = "right"              
+            prev = current
+            current = current.next_segment
+    
+    
     def moveSegments(self):
         current = self.head.next_segment
         prev = self.head
         if prev == self.head:
             prev.direction = self.direction
-        while current: 
-            if current.move_delay == 0:
-                if prev.direction == 'left':
-                    current.direction = 'left'
-                elif prev.direction == 'right':
-                    current.direction = 'right'
-                elif prev.direction == 'up':
-                    current.direction = 'up'
-                elif prev.direction == 'down':
-                    current.direction = "down"
-                print(prev.direction)
-            else:
-                current.move_delay -= 1        
+        while current:
             if current.direction == "left":
                 current.moveLeft(self.speed)
             elif current.direction == "right":
@@ -180,10 +203,7 @@ class Snake:
             prev = current
             current = current.next_segment
         #for each segment in the list of segments, each segment should wait 10 * indexOfSegments before moving
-        
-            
-
-                    
+                        
     def draw(self, screen):
         segment = self.head
         while segment is not None:
@@ -237,6 +257,7 @@ while run:
         score += 1
     snake.check_direction()
     snake.move()
+    snake.updateSegmentDirection()
     snake.moveSegments()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
