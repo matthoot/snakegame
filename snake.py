@@ -8,6 +8,10 @@ pygame.init()
 #18 x 16 board, 850x750
 
 snakeHead_image = pygame.image.load('assets/snake.png')
+snakeRight_image = pygame.image.load('assets/snakeRight.png')
+snakeLeft_image = pygame.image.load('assets/snakeLeft.png')
+snakeUp_image = pygame.image.load('assets/snakeUp.png')
+snakeDown_image = pygame.image.load('assets/snakeDown.png')
 snakeTail_image = pygame.image.load('assets/tail.png')
 orange_image = pygame.image.load('assets/orange.png')
 
@@ -56,8 +60,6 @@ class Segment:
         self.center_x = x + 20
         self.center_y = y + 20
         self.direction = "none"
-        self.index = 0
-        self.move_delay = 0
         
     def moveLeft(self, speed):
         self.rect.x -= speed
@@ -83,11 +85,11 @@ class Snake:
         self.direction = "none"
         self.last_direction = "none"
         self.canGoLeft = False
-        self.canGoRight = False
+        self.canGoRight = False 
         self.canGoUp = False
         self.canGoDown = False
         self.speed = 5
-        self.offset = 50
+        self.offset = 5
         self.totalSegments = 0
         
     def move(self):
@@ -135,22 +137,21 @@ class Snake:
             self.canGoDown = False
     
     def addSegment(self):
-        last_segment = self.tail
-        if self.direction == "left":
-            new_segment = Segment(last_segment.rect.x + self.offset, last_segment.rect.y, snakeTail_image)
-        elif self.direction == "right":
-            new_segment = Segment(last_segment.rect.x - self.offset, last_segment.rect.y, snakeTail_image)
-        elif self.direction == "up":
-            new_segment = Segment(last_segment.rect.x, last_segment.rect.y + self.offset, snakeTail_image)
-        elif self.direction == "down":
-            new_segment = Segment(last_segment.rect.x, last_segment.rect.y - self.offset, snakeTail_image)
-        last_segment.next_segment = new_segment
-        new_segment.last_segment = last_segment
-        self.tail = new_segment
-        self.totalSegments += 1
-        new_segment.index = self.totalSegments
-        new_segment.move_delay = new_segment.index * 10
-        new_segment.direction = self.direction
+        for i in range(1,11):
+            last_segment = self.tail
+            if self.direction == "left":
+                new_segment = Segment(last_segment.rect.x + self.offset, last_segment.rect.y, snakeTail_image)
+            elif self.direction == "right" or self.direction == "none":
+                new_segment = Segment(last_segment.rect.x - self.offset, last_segment.rect.y, snakeTail_image)
+            elif self.direction == "up":
+                new_segment = Segment(last_segment.rect.x, last_segment.rect.y + self.offset, snakeTail_image)
+            elif self.direction == "down":
+                new_segment = Segment(last_segment.rect.x, last_segment.rect.y - self.offset, snakeTail_image)
+            last_segment.next_segment = new_segment
+            new_segment.last_segment = last_segment
+            self.tail = new_segment
+            self.totalSegments += 1
+            new_segment.direction = self.direction
 
     def updateSegmentDirection(self):
         current = self.head.next_segment
@@ -181,7 +182,13 @@ class Snake:
                             current.direction = "left"
             elif current.direction == "down" and prev.direction == "right":
                 if current.center_y == prev.center_y:
-                            current.direction = "right"              
+                            current.direction = "right"
+            elif current.direction == "none" and prev.direction == "right":
+                current.direction = "right"               
+            elif current.direction == "none" and prev.direction == "up":
+                current.direction = "right"
+            elif current.direction == "none" and prev.direction == "down":
+                current.direction = "right"      
             prev = current
             current = current.next_segment
     
@@ -202,13 +209,22 @@ class Snake:
                 current.moveDown(self.speed)
             prev = current
             current = current.next_segment
-        #for each segment in the list of segments, each segment should wait 10 * indexOfSegments before moving
                         
     def draw(self, screen):
-        segment = self.head
+        segment = self.tail
         while segment is not None:
-            screen.blit(segment.image, segment.rect)
-            segment = segment.next_segment
+            if segment.last_segment == None:
+                if snake.direction == "left":
+                    screen.blit(snakeLeft_image, segment.rect)
+                if snake.direction == "right" or snake.direction == "none":
+                    screen.blit(snakeRight_image, segment.rect)
+                if snake.direction == "up":
+                    screen.blit(snakeUp_image, segment.rect)    
+                if snake.direction == "down":
+                    screen.blit(snakeDown_image, segment.rect)          
+            else:     
+                screen.blit(segment.image, segment.rect)
+            segment = segment.last_segment
                   
 WIDTH = 950
 HEIGHT = 950
@@ -221,10 +237,9 @@ rows = 15
 cols = 17
 orange = Orange()
 snake = Snake(255, 505)
+snake.addSegment()
 score = 0
 direction_command = "none"
-move_delay = 0
-
 
 def drawboard():
     pygame.draw.rect(screen, (72, 118, 47), pygame.Rect(0, 0, 950, 100)) # top bar with score and stuff
@@ -273,15 +288,14 @@ while run:
                 direction_command = "down"
     
     snake.last_direction = snake.direction
-    if direction_command == "right" and snake.canGoRight:
+    if direction_command == "right" and snake.canGoRight and snake.direction != "left":
         snake.direction = "right"
-    if direction_command == "left" and snake.canGoLeft:
+    if direction_command == "left" and snake.canGoLeft and snake.direction != "right" and snake.direction != "none":
         snake.direction = "left"
-    if direction_command == "up" and snake.canGoUp:
+    if direction_command == "up" and snake.canGoUp and snake.direction != "down":
         snake.direction = "up"
-    if direction_command == "down" and snake.canGoDown:
+    if direction_command == "down" and snake.canGoDown and snake.direction != "up":
         snake.direction = "down"
-    
     pygame.display.flip()
     
 pygame.quit()
