@@ -103,8 +103,7 @@ class Snake:
         elif self.direction == "down" and self.canGoDown:
             self.head.moveDown(self.speed)
         else:
-            self.direction = self.last_direction
-            
+            self.direction = self.last_direction           
             
     def check_direction(self):
         centerAdjust = 30
@@ -113,14 +112,14 @@ class Snake:
         if self.direction == "none" and direction_command == "none":
             self.canGoLeft, self.canGoRight, self.canGoUp, self.canGoDown = True, True, True, True
         
-        if 20 <= currentSquare_x <= 30:
+        if 22 <= currentSquare_x <= 28:
             self.canGoUp = True
             self.canGoDown = True
         else:
             self.canGoUp = False
             self.canGoDown = False
                 
-        if 20 <= currentSquare_y <= 30:
+        if 22 <= currentSquare_y <= 28:
             self.canGoRight = True
             self.canGoLeft = True
         else:
@@ -157,7 +156,8 @@ class Snake:
         current = self.head.next_segment
         prev = self.head
         if prev == self.head:
-            prev.direction = self.direction    
+            prev.direction = self.direction
+            print("HEAD")    
         while current:
             if current.direction == "right" and prev.direction == "up":
                 if current.center_x == prev.center_x:
@@ -176,23 +176,23 @@ class Snake:
                     current.direction = "left"
             elif current.direction == "up" and prev.direction == "right":
                 if current.center_y == prev.center_y:
-                        current.direction = "right"    
+                    current.direction = "right"    
             elif current.direction == "down" and prev.direction == "left":
                 if current.center_y == prev.center_y:
-                            current.direction = "left"
+                    current.direction = "left"
             elif current.direction == "down" and prev.direction == "right":
                 if current.center_y == prev.center_y:
-                            current.direction = "right"
+                    current.direction = "right"
             elif current.direction == "none" and prev.direction == "right":
                 current.direction = "right"               
             elif current.direction == "none" and prev.direction == "up":
                 current.direction = "right"
             elif current.direction == "none" and prev.direction == "down":
-                current.direction = "right"      
+                current.direction = "right"
+            print(current.direction, prev.direction)      
             prev = current
             current = current.next_segment
-    
-    
+       
     def moveSegments(self):
         current = self.head.next_segment
         prev = self.head
@@ -270,10 +270,11 @@ while run:
         orange.randomize()
         snake.addSegment()
         score += 1
-    snake.check_direction()
     snake.move()
-    snake.updateSegmentDirection()
+    snake.check_direction()
     snake.moveSegments()
+    snake.updateSegmentDirection()
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
@@ -297,5 +298,4 @@ while run:
     if direction_command == "down" and snake.canGoDown and snake.direction != "up":
         snake.direction = "down"
     pygame.display.flip()
-    
 pygame.quit()
